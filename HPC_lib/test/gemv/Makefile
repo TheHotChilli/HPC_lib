@@ -17,8 +17,11 @@ else
 endif
 
 # Intel MKL Configuration (replace with appropriate paths)
-MKL_ARCH := intel64				#Processor Architecture
-MKL_ROOT := /path/to/mkl					
+# 
+# Intel link line advisor:
+# https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl-link-line-advisor.html
+MKL_ARCH := intel64				                                            #Processor Architecture
+MKL_ROOT := /opt/intel/oneapi/mkl/latest
 MKL_INCLUDE_DIR  := $(MKL_ROOT)/include
 MKL_LIB_DIRS := $(MKL_ROOT)/lib/$(MKL_ARCH) $(MKL_ROOT)/mkl/lib/$(MKL_ARCH)
 

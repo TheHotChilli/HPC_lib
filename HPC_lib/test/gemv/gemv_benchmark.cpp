@@ -8,9 +8,6 @@
 #include <HPC_lib/utils/runtime.hpp>
 #include <HPC_lib/BLAS/gemv.hpp>
 
-
-
-
 //------------------------------------------------------------------------------
 // benchmark parameters
 
@@ -98,8 +95,8 @@ int main() {
     std::cout << "# COLMAJOR    = " << COLMAJOR << "\n";
     std::cout << "# T_MIN       = " << T_MIN << "\n";
     std::cout << "#RUN    M     N  INCROW  INCCOL";
-    std::cout << "    GEMV_MKL    GEMV_ULM";
-    std::cout << "    GEMV_MKL    GEMV_ULM";
+    std::cout << "    GEMV_MKL    GEMV_OWN";
+    std::cout << "    GEMV_MKL    GEMV_OWN";
     std::cout << "       DIFF2";
     std::cout << "\n";
     std::cout << "#                              ";
