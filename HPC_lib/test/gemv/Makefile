@@ -3,17 +3,17 @@ COLMAJOR  = -DCOLMAJOR=1
 ROWMAJOR  = -DCOLMAJOR=0
 
 # Compiler and Compiler Flags
-CC_LINUX       := g++
-CC_WINDOWS     := g++
-CFLAGS_LINUX  := -std=c++17 -Wall -Ofast
-CFLAGS_WINDOWS := -std=c++17 -Wall -Ofast
+CXX_LINUX        := g++
+CXX_WINDOWS      := gcc
+CXXFLAGS_LINUX   := -std=c++17 -Wall -Ofast
+CXXFLAGS_WINDOWS := -std=c++17 -Wall -Ofast
 # Determine Platform
 ifeq ($(shell uname -s), Linux)
-    CC       := $(CC_LINUX)
-    CFLAGS  := $(CFLAGS_LINUX)
+    CXX         := $(CPPC_LINUX)
+    CXXFLAGS    := $(CFLAGS_LINUX)
 else
-    CC       := $(CC_WINDOWS)
-    CFLAGS  := $(CFLAGS_WINDOWS)
+    CXX         := $(CPPC_WINDOWS)
+    CXXFLAGS    := $(CFLAGS_WINDOWS)
 endif
 
 # Intel MKL Configuration (replace with appropriate paths)
