@@ -23,10 +23,11 @@ This subfolder contains generic C++ implementations (using template parameters) 
 
  This projects implements the following operations:
 - Level 1:
-  - (SWAP)
-  - SCAL
-  - COPY
-  - DOT
+  - (SWAP) $y \leftrightarrow x$
+  - SCAL $x \leftarrow \alpha x$
+  - COPY $y \leftarrow x$
+  - DOT $dot \leftarrow x^T y$
+  - AXPY $y \leftarrow y + \alpha x$
 - Level 2:
   - GEMV
 - Level 3:
