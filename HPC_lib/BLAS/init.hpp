@@ -12,15 +12,15 @@ namespace hpc { namespace blas {
 template <typename TA>
 void initMatrix(std::size_t m, std::size_t n, 
                 TA *A, std::ptrdiff_t incRowA, std::ptrdiff_t incColA,
-                bool NaN) 
+                bool isNaN) 
 {
     // A is row-major -> init A^T
     if (MY_ABS(incRowA) > MY_ABS(incColA)) {
-        initMatrix(n, m, A, incColA, incRowA);
+        initMatrix(n, m, A, incColA, incRowA, isNaN);
         return;
     }
     // A is col-major
-    if (NaN) {
+    if (isNaN) {
         // NaN init
         for (std::size_t j=0; j<n; ++j) {
             for (std::size_t i=0; i<m; ++i) {

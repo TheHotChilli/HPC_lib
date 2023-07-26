@@ -92,8 +92,8 @@ void gemv_fused(std::size_t m, std::size_t n,
         // loop first m_b even blocks 
         for (std::size_t i_b=0; i_b<m_b; ++i_b) {
             // get current block
-            TA *A_b = &A[i_b*DGEMV_DOTF_FUSE*incRowA];
-            TY *y_b = &y[ib*DGEMV_DOTF_FUSE*incY];
+            const TA *A_b = &A[i_b*DGEMV_DOTF_FUSE*incRowA];
+            TY *y_b = &y[i_b*DGEMV_DOTF_FUSE*incY];
             // perform fused dot product on block (zick zack pattern)
             for (std::size_t j=0; j<n; ++j) {
                 for (std::size_t i=0; i<DGEMV_DOTF_FUSE; ++i) {
@@ -114,10 +114,10 @@ void gemv_fused(std::size_t m, std::size_t n,
         // number of blocks
         std::size_t n_b = n / DGEMV_AXPYF_FUSE;
         // loop first n_b even blocks
-        for (std::size_t j_b=0; j_b<n_b; ++i_j) {
+        for (std::size_t j_b=0; j_b<n_b; ++j_b) {
             // get current block
-            TA *A_b = &A[jb*DGEMV_AXPYF_FUSE*incColA];
-            TX *x_b = &x[jb*DGEMV_AXPYF_FUSE*incX];
+            const TA *A_b = &A[j_b*DGEMV_AXPYF_FUSE*incColA];
+            const TX *x_b = &x[j_b*DGEMV_AXPYF_FUSE*incX];
             // perform fused axpy operation on block (zick zack pattern)
             for (std::size_t i=0; i<m; ++i) {
                 for (std::size_t j=0; j<DGEMV_AXPYF_FUSE; ++j) {
@@ -126,8 +126,11 @@ void gemv_fused(std::size_t m, std::size_t n,
             }
         }
         // last odd block (if present)
-        for (std::size_t j=nb*DGEMV_AXPYF_FUSE; j<n; ++j) {
-
+        for (std::size_t j=n_b*DGEMV_AXPYF_FUSE; j<n; ++j) {
+            // axpy(m, alpha*x[j*incX], &A[j*incColA], incRowA, y, incY);
+            for (std::size_t i=0; i<m; ++i) {
+                y[i*incY] += TY(alpha) * TY(A[i*incRowA + j*incColA]) * TY(x[j*incX]);
+            }
         }
     }
 }  

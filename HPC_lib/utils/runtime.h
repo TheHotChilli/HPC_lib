@@ -38,6 +38,7 @@ double get_cputime(){
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
+#include <unistd.h>
 double get_walltime(){
     struct tms ts;
     static double ClockTick=0;

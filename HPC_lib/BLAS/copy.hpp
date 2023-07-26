@@ -14,7 +14,7 @@ void copy(std::size_t n,
           TY *y, std::ptrdiff_t incY)
 {
     for (std::size_t i=0; i<n; ++i) {
-        y[i*incY] = tools::conjugate(x[i*incX], conjX);
+        y[i*incY] = utils::conjugate(x[i*incX], conjX);
     }
 }
 
@@ -38,7 +38,7 @@ gecopy(std::size_t m, size_t n,
     for (std::size_t j=0; j<n; ++j) {
         for (std::size_t i=0; i<m; ++i) {
             B[i*incRowB+j*incColB]
-                = tools::conjugate(A[i*incRowA+j*incColA], conjA);
+                = utils::conjugate(A[i*incRowA+j*incColA], conjA);
         }
 
     }

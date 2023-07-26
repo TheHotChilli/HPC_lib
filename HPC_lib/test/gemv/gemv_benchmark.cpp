@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <iostream>
 #include <iomanip>
-// #include <mkl.h>
+#include <mkl.h>
 #include <HPC_lib/BLAS/init.hpp>
 #include <HPC_lib/BLAS/asumDiffMatrix.hpp>
 #include <HPC_lib/BLAS/copy.hpp>
@@ -53,6 +53,7 @@
 #endif
 
 //------------------------------------------------------------------------------
+
 
 double A[MAX_M*MAX_N];
 double X[MAX_N*INCX];
