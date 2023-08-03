@@ -13,27 +13,29 @@ template<typename T>
 struct Buffer {
 
     // Variables
-    const std::size_t n;
-    const std::align_val_t alignment;
-    T* const ptr;
+    const std::size_t n;                // number of buffer elements
+    const std::align_val_t alignment;   // alignment in byte
+    T* const ptr;                       // pointer to buffer in memory
 
     // Constructor
     template<typename... Args>
-    Buffer(std::size_t n, std::size_t alignment = alignof(T), Args... args)
-    : 
+    Buffer(std::size_t n, std::size_t alignment = alignof(T), Args... args) : 
         n(n), 
+        // init alignment with max of the alignment requirements of type T and the provided alignment value 
         alignment(std::align_val_t(std::max(alignof(T), alignment))),
-	    ptr(n > 0?
+        // allocate memory for n objects of type T and init ptr with Pointer of type T* to it (or nullptr)
+	    ptr(n > 0 ?
 	        static_cast<T*>(operator new(sizeof(T) * n, this->alignment))
 	        :  
 	        nullptr)       
     {
+        // construct n objects of type T within the allocated memory
         for (std::size_t i = 0; i < n; ++i) {
 	        new (ptr + i) T(args...);
         }
     }
 
-    // Move Constructor
+    // default Move Constructor 
     Buffer(Buffer&&) = default;
     // delete Copy Constructor -> disable copy construction
     Buffer(const Buffer&) = delete;

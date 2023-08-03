@@ -5,7 +5,7 @@
 #include <HPC_lib/BLAS/axpy.hpp>
 #include <HPC_lib/BLAS/scal.hpp>
 
-namespace hpc { namespace BLAS { 
+namespace hpc { namespace blas { 
 
 
 // declare type alias UGEMM<T> for micro kernel (ugemm) function 

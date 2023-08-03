@@ -16,10 +16,11 @@
 
 namespace hpc { namespace blas { 
 
-//------------------------------------------------------------------------------
-// Frame Algo
 
-template <typename T>
+
+using GemmConfigType = config::GemmConfigType;
+
+template <typename T, GemmConfigType ConfigType = GemmConfigType::Default>
 void gemm(std::size_t m, std::size_t n, std::size_t k,
           t alpha, 
           bool conjA, const T *A, std::ptrdiff_t incRowA, std::ptrdiff_t incColA,
@@ -33,7 +34,7 @@ void gemm(std::size_t m, std::size_t n, std::size_t k,
     }
 
     // load config
-    config::GemmConfig conf;
+    config::GemmConfig<T, ConfigType> gemm_conf;
 
     // block sizes
     std::size_t MC = conf.MC;
@@ -87,6 +88,6 @@ void gemm(std::size_t m, std::size_t n, std::size_t k,
 }
 
 
-} } // end namespace hpc, blas
+} } // namespace hpc, blas
 
-#endif // end HPC_BLAS_GEMM_HPP
+#endif // HPC_BLAS_GEMM_HPP

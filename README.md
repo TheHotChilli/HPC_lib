@@ -23,7 +23,7 @@ This subfolder contains generic C++ implementations (using template parameters) 
 
  This projects implements the following operations:
 - Level 1:
-  - (SWAP) $y \leftrightarrow x$
+  - (SWAP) $y \leftrightarrow x$ - tbd
   - SCAL $x \leftarrow \alpha x$
   - COPY $y \leftarrow x$
   - DOT $dot \leftarrow x^T y$
@@ -31,13 +31,13 @@ This subfolder contains generic C++ implementations (using template parameters) 
 - Level 2:
   - GEMV
 - Level 3:
-  - (GEMM)
+  - (GEMM) - tbd
 
 ### test
 This subfolder contains tests for our implmentations of BLAS routines. For benchmarking we compare to the Intel Math Kernel Library (MKL). 
 
 ### utils
-Contains several usefull functions that are used at various points within the project. 
+Contains several functions that are used at various points within the project. 
 
 ## Parallelizations/Optimization
 - GEMV

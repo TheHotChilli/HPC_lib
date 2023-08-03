@@ -1,6 +1,11 @@
 #ifndef HPC_BLAS_GEMM_AVX_SUGEMM_8X8_HPP
 #define HPC_BLAS_GEMM_AVX_SUGEMM_8X8_HPP
 
+//
+//  BLIS
+//  An object-based framework for developing high-performance BLAS-like
+//  libraries.
+//
 // Copyright (C) 2014, The University of Texas at Austin
 //
 // Redistribution and use in source and binary forms, with or without
