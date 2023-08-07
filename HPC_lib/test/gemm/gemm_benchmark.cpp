@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip> // For std::setw
 #include <float.h>
+#include <array> // for std::array
 
 #include <mkl.h>    
 
@@ -53,13 +54,17 @@ using namespace hpc;
 #define COLMAJOR_B 1
 #endif
 
-constexpr std::vector<blas::config::GemmConfigType> allConfigs = {
-    blas::config::GemmConfigType::Default,
-    // blas::config::GemmConfigType::SSE,
-    // blas::config::GemmConfigType::AVX,
-    // blas::config::GemmConfigType::AVX_BLIS,
-    // blas::config::GemmConfigType::AVX_512
+constexpr std::array<blas::config::GemmConfigType, 1> allConfigs = {
+    blas::config::GemmConfigType::Default
 };
+
+// constexpr std::array<blas::config::GemmConfigType, 5> allConfigs = {
+//     blas::config::GemmConfigType::Default,
+//     blas::config::GemmConfigType::SSE,
+//     blas::config::GemmConfigType::AVX,
+//     blas::config::GemmConfigType::AVX_BLIS,
+//     blas::config::GemmConfigType::AVX_512
+// };
 
 //------------------------------------------------------------------------------
 
@@ -135,18 +140,19 @@ void dgemm_mkl(int m, int n, int k,
                double beta,
                double *C, int incRowC, int incColC)
 {
-    CBLAS_LAYOUT layout (incRowC == 1) ? CblasColMajor : CblasRowMajor;
-    MKL_INT ldC (incRowC == 1) ? incColC : incRowC;
+    CBLAS_LAYOUT layout = (incRowC == 1) ? CblasColMajor : CblasRowMajor;
+    MKL_INT ldC = (incRowC == 1) ? incColC : incRowC;
 
-    MKL_INT ldA (incRowA == 1) ? incColA : incRowA; // m : k
-    MKL_INT ldB (incRowB == 1) ? incColB : incRowB; // k : n
+    MKL_INT ldA = (incRowA == 1) ? incColA : incRowA; // m : k
+    MKL_INT ldB = (incRowB == 1) ? incColB : incRowB; // k : n
 
+    CBLAS_TRANSPOSE transA, transB;
     if (layout == CblasColMajor) {
-        CBLAS_TRANSPOSE transA (incRowA == 1) ? CblasNoTrans : CblasTrans;
-        CBLAS_TRANSPOSE transB (incRowB == 1) ? CblasNoTrans : CblasTrans;
+        transA = (incRowA == 1) ? CblasNoTrans : CblasTrans;
+        transB = (incRowB == 1) ? CblasNoTrans : CblasTrans;
     } else {
-        CBLAS_TRANSPOSE transA (incRowA == 1) ? CblasTrans : CblasNoTrans;
-        CBLAS_TRANSPOSE transB (incRowB == 1) ? CblasTrans : CblasNoTrans;
+        transA = (incRowA == 1) ? CblasTrans : CblasNoTrans;
+        transB = (incRowB == 1) ? CblasTrans : CblasNoTrans;
     }
 
     // Call Intel MKL's GEMM function directly
@@ -196,7 +202,7 @@ void print_header() {
                   << std::setw(7) << "tTest"
                   << std::setw(12) << "mflopsTest";
     }
-    std::cout << "\n"
+    std::cout << "\n";
 }
 
 //------------------------------------------------------------------------------
@@ -204,10 +210,6 @@ void print_header() {
 int main() 
 {
     print_header();
-
-    // Arrays to store the results for each configuration
-    double errors[allConfigs.size()];
-    double tTstVals[allConfigs.size()];
 
     // for measuring runtimes
     double t0, t1;
@@ -217,15 +219,6 @@ int main()
          m <= DIM_MAX_M && n <= DIM_MAX_N && k <= DIM_MAX_K;
          m += 100, n +=100, k += 100) 
     {
-        // print matrix dims
-        std::cout << " " 
-                  // matrix dims
-                  << std::setw(7) << m << std::setw(7) << n << std::setw(7) << k 
-                  << std::setw(7) << incRowC << std::setw(7) << incColC << std::setw(7) 
-                  << incRowA << std::setw(7) << incColA 
-                  << std::setw(7) << incRowB << std::setw(7) << incColB 
-                  << std::setw(7) << ALPHA << std::setw(7) << BETA;
-
         // number of FLOP using this m,n,k
         double mflop = 2. * m/1000 * n/1000 * k;
 
@@ -238,6 +231,15 @@ int main()
 
         std::size_t incRowB = (COLMAJOR_B) ? 1 : n;
         std::size_t incColB = (COLMAJOR_B) ? k : 1;
+
+        // print matrix dims
+        std::cout << " " 
+                  // matrix dims
+                  << std::setw(7) << m << std::setw(7) << n << std::setw(7) << k 
+                  << std::setw(7) << incRowC << std::setw(7) << incColC << std::setw(7) 
+                  << incRowA << std::setw(7) << incColA 
+                  << std::setw(7) << incRowB << std::setw(7) << incColB 
+                  << std::setw(7) << ALPHA << std::setw(7) << BETA;
 
         // allocate memory
         double A[m*n];
@@ -283,7 +285,7 @@ int main()
         double tTest, error; 
         for (std::size_t configIdx = 0; configIdx < allConfigs.size(); ++configIdx) 
         {
-            const auto& configType = allConfigs[configIdx];
+            // const auto& configType = allConfigs[configIdx];
             runs = 0;
             tTest = 0;
             do {
@@ -291,7 +293,7 @@ int main()
                             false, C_0, incRowC, incColC, 
                             C_test, incRowC, incColC);
                 t0 = utils::get_walltime();
-                blas::gemm<double, configType>(
+                blas::gemm<double, allConfigs[configIdx]>(
                     m, n, k,
                     ALPHA,
                     false, A, incRowA, incColA,

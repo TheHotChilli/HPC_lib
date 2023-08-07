@@ -40,11 +40,11 @@ gemm_colmajor : gemm_benchmark.cpp
 
 run: run_rowmajor run_colmajor
 
-run_rowmajor: gemv_rowmajor
+run_rowmajor: gemm_rowmajor
 	@echo "ROWMAJOR Benchmark"
 	LD_LIBRARY_PATH=$(MKL_LIB_DIR):$(LD_LIBRARY_PATH) ./gemm_rowmajor | tee gemm_rowmajor.dat
 
-run_colmajor: gemv_colmajor
+run_colmajor: gemm_colmajor
 	@echo "COLMAJOR Benchmark"
 	LD_LIBRARY_PATH=$(MKL_LIB_DIR):$(LD_LIBRARY_PATH) ./gemm_colmajor | tee gemm_colmajor.dat
 
