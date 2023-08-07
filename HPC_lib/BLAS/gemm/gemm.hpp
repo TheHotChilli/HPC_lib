@@ -22,7 +22,7 @@ using GemmConfigType = config::GemmConfigType;
 
 template <typename T, GemmConfigType ConfigType = GemmConfigType::Default>
 void gemm(std::size_t m, std::size_t n, std::size_t k,
-          t alpha, 
+          T alpha, 
           bool conjA, const T *A, std::ptrdiff_t incRowA, std::ptrdiff_t incColA,
           bool conjB, const T *B, std::ptrdiff_t incRowB, std::ptrdiff_t incColB,
           T beta, 

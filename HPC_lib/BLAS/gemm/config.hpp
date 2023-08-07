@@ -33,6 +33,18 @@ enum GemmConfigType {
 };
 // ugemm_config ugemm_variant = Defualt;
 
+std::string getConfigTypeString(GemmConfigType configType) {
+    switch (configType) {
+        case GemmConfigType::Default: return "Default";
+        case GemmConfigType::SSE: return "SSE";
+        case GemmConfigType::AVX: return "AVX";
+        case GemmConfigType::AVX_BLIS: return "AVX_BLIS";
+        case GemmConfigType::AVX_512: return "AVX_512";
+        default: return "Unknown";
+    }
+}
+
+
 // Function alias for macro kernel
 template <typename T>
 using MGemm = void (*)(std::size_t, std::size_t, std::size_t,
@@ -150,8 +162,8 @@ struct GemmConfig<double, GemmConfigType::AVX_BLIS>
     std::size_t alignment;                  // custom memory alignment
     std::size_t extra_A, extra_B;           // extra space in packing buffers
     
-    MGemm<float> mgemm;
-    Pack<float> pack_A, pack_B;
+    MGemm<double> mgemm;
+    Pack<double> pack_A, pack_B;
 
     GemmConfig()
     {
@@ -177,8 +189,8 @@ struct GemmConfig<std::complex<float>, GemmConfigType::AVX_BLIS>
     std::size_t alignment;                  // custom memory alignment
     std::size_t extra_A, extra_B;           // extra space in packing buffers
     
-    MGemm<float> mgemm;
-    Pack<float> pack_A, pack_B;
+    MGemm<std::complex<float>> mgemm;
+    Pack<std::complex<float>> pack_A, pack_B;
 
     GemmConfig()
     {
@@ -204,8 +216,8 @@ struct GemmConfig<std::complex<double>, GemmConfigType::AVX_BLIS>
     std::size_t alignment;                  // custom memory alignment
     std::size_t extra_A, extra_B;           // extra space in packing buffers
     
-    MGemm<float> mgemm;
-    Pack<float> pack_A, pack_B;
+    MGemm<std::complex<double>> mgemm;
+    Pack<std::complex<double>> pack_A, pack_B;
 
     GemmConfig()
     {

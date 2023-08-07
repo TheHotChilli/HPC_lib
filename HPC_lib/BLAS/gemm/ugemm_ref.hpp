@@ -33,7 +33,7 @@ template <typename T, std::size_t MR, std::size_t NR>
 void ugemm_ref(std::size_t k, T alpha,
                const T *A, const T *B,
                T beta,
-               T *C std::ptrdiff_t incRowC, std::ptrdiff_t incColC,
+               T *C, std::ptrdiff_t incRowC, std::ptrdiff_t incColC,
                const T* /*a_next*/,
                const T* /*b_next*/)
 {
