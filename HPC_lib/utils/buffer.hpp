@@ -37,8 +37,10 @@ struct Buffer {
 
     // default Move Constructor 
     Buffer(Buffer&&) = default;
+
     // delete Copy Constructor -> disable copy construction
     Buffer(const Buffer&) = delete;
+    
     // delete Copy Assignment Operator -> disable copy assignment
     Buffer& operator=(const Buffer&) = delete;
 

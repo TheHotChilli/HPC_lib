@@ -69,5 +69,3 @@ plot_colmajor: gemv_colmajor.dat
 
 clean:
 	$(RM) $(TARGETS) $(wildcard *.o) $(addsuffix .dat, $(TARGETS)) $(addsuffix .svg, $(TARGETS))
-
-

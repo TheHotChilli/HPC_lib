@@ -52,12 +52,12 @@ void scal(std::size_t n, const TALPHA & alpha,
  * @param incRowA Increment between consecutive rows in the matrix `A`.
  * @param incColA Increment between consecutive columns in the matrix `A`.
  */
-template <typename TALPHA, typename T>
-void gscal(std::size_t m, std::size_t n,
+template <typename TALPHA, typename TA>
+void gescal(std::size_t m, std::size_t n,
            const TALPHA & alpha,
            TA *A, std::ptrdiff_t incRowA, std::ptrdiff_t incColA)
 {
-    if (m==0 || n==0 || alpha==Alpha(1)) {
+    if (m==0 || n==0 || alpha==TALPHA(1)) {
         return;
     }
     // row major -> scale A^T
@@ -66,7 +66,7 @@ void gscal(std::size_t m, std::size_t n,
         return;
     }
     // col major
-    if (alpha!=Alpha(0)) {
+    if (alpha!=TALPHA(0)) {
         for (std::size_t j=0; j<n; ++j) {
             for (std::size_t i=0; i<m; ++i) {
                 A[i*incRowA+j*incColA] *= TA(alpha);

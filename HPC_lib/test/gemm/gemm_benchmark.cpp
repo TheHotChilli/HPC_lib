@@ -54,9 +54,9 @@ using namespace hpc;
 #define COLMAJOR_B 1
 #endif
 
-constexpr std::array<blas::config::GemmConfigType, 1> allConfigs = {
-    blas::config::GemmConfigType::Default
-};
+// constexpr std::array<blas::config::GemmConfigType, 1> allConfigs = {
+//     blas::config::GemmConfigType::Default
+// };
 
 // constexpr std::array<blas::config::GemmConfigType, 5> allConfigs = {
 //     blas::config::GemmConfigType::Default,
@@ -165,12 +165,12 @@ void dgemm_mkl(int m, int n, int k,
     //                   const double *a, const MKL_INT lda, 
     //                   const double *b, const MKL_INT ldb, 
     //                   const double beta, 
-    //                   double *c, const MKL_INT ldc);
+    //                   double *c, const MKL_INT ldc);>
 }
 
 void print_header() {
     // load config settings
-    blas::config::GemmConfig<double, blas::config::GemmConfigType::AVX_BLIS> gemm_config;
+    blas::config::GemmConfig<double> gemm_config;
 
     // print config settings
     std::cout << "# Configuration:\n";
@@ -183,26 +183,15 @@ void print_header() {
     // print results table head
     std::cout << "#\n";
     std::cout << "# Benchmark:\n";
-    // configType line
-    std::cout << "#" << std::string(11*7, ' ') << " | " 
-              << std::setw(7 + 12) << "Ref";
-    for (const auto &configType : allConfigs) {
-        std::cout << " | " << std::setw(12 + 7 + 12) << blas::config::getConfigTypeString(configType) << " | ";
-    }
-    // column name line
-    std::cout << std::left << std::setw(7) << "MR" << std::setw(7) << "NR" << std::setw(7) << "k"
-              << std::setw(7) << "incRowC" << std::setw(7) << "incColC" << std::setw(7) << "incRowA"
-              << std::setw(7) << "incColA" << std::setw(7) << "incRowB" << std::setw(7) << "incColB"
-              << std::setw(7) << "alpha" << std::setw(7) << "beta"
-              << " | "
-              << std::setw(7) << "tRef"  << std::setw(12) << "mflopsRef";
-    for (const auto& configType : allConfigs) {
-        std::cout << " | " 
-                  << std::setw(12) << "error"
-                  << std::setw(7) << "tTest"
-                  << std::setw(12) << "mflopsTest";
-    }
-    std::cout << "\n";
+    std::cout << "#" << std::setw(8) << "MR" << std::setw(8) << "NR" << std::setw(8) << "k"
+              << std::setw(8) << "incRowC" << std::setw(8) << "incColC" << std::setw(8) << "incRowA"
+              << std::setw(8) << "incColA" << std::setw(8) << "incRowB" << std::setw(8) << "incColB"
+              << std::setw(8) << "alpha" << std::setw(8) << "beta"
+              //<< " | "
+              << std::setw(12) << "error"
+              << std::setw(12) << "tRef[s]" << std::setw(12) << "tTest[s]"
+              << std::setw(12) << "mflopsRef" << std::setw(12) << "mflopsTest"
+              << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -235,25 +224,26 @@ int main()
         // print matrix dims
         std::cout << " " 
                   // matrix dims
-                  << std::setw(7) << m << std::setw(7) << n << std::setw(7) << k 
-                  << std::setw(7) << incRowC << std::setw(7) << incColC << std::setw(7) 
-                  << incRowA << std::setw(7) << incColA 
-                  << std::setw(7) << incRowB << std::setw(7) << incColB 
-                  << std::setw(7) << ALPHA << std::setw(7) << BETA;
+                  << std::setw(8) << m << std::setw(8) << n << std::setw(8) << k 
+                  << std::setw(8) << incRowC << std::setw(8) << incColC << std::setw(8) 
+                  << incRowA << std::setw(8) << incColA 
+                  << std::setw(8) << incRowB << std::setw(8) << incColB 
+                  << std::setw(8) << ALPHA << std::setw(8) << BETA;
 
         // allocate memory
-        double A[m*n];
-        double B[k*n];
-        double C_0[m*n];
-        double C_ref[m*n];
-        double C_test[m*n];
+        double* A      = new double[m*n];
+        double* B      = new double[k*n];
+        double* C_0    = new double[m*n];
+        double* C_ref  = new double[m*n];
+        double* C_test = new double[m*n];
+
 
         // init matrices
         utils::initMatrix(m, k, A, incRowA, incColA, false);
         utils::initMatrix(k, n, B, incRowA, incColA, false);
         utils::initMatrix(m, n, C_0, incRowC, incColC, false);
 
-        // call reference implementation (intel MKL)
+        // call reference implementation (intel MKL)                // print reference results
         int     runs = 0;
         double  tRef = 0;
         do {
@@ -261,11 +251,11 @@ int main()
                         false, C_0, incRowC, incColC, 
                         C_ref, incRowC, incColC);
             t0 = utils::get_walltime();
-            blas::gemm<double, blas::config::GemmConfigType::Default>(
+            dgemm_mkl(
                 m, n, k,
                 ALPHA,
-                false, A, incRowA, incColA,
-                false, B, incRowB, incColB,
+                A, incRowA, incColA,
+                B, incRowB, incColB,
                 BETA,
                 C_ref, incRowC, incColC
             );
@@ -275,52 +265,52 @@ int main()
         } while (tRef < 1);
         tRef /= runs;
 
-        // print reference results
-        std::cout << " | " 
-                  << std::scientific 
-                  << std::setw(7) << std::setprecision(2) << tRef
-                  << std::setw(12) << std::setprecision(2) << mflop / tRef;
-
         // call own implementations
-        double tTest, error; 
-        for (std::size_t configIdx = 0; configIdx < allConfigs.size(); ++configIdx) 
-        {
-            // const auto& configType = allConfigs[configIdx];
-            runs = 0;
-            tTest = 0;
-            do {
-                blas::gecopy(m, n, 
-                            false, C_0, incRowC, incColC, 
-                            C_test, incRowC, incColC);
-                t0 = utils::get_walltime();
-                blas::gemm<double, allConfigs[configIdx]>(
-                    m, n, k,
-                    ALPHA,
-                    false, A, incRowA, incColA,
-                    false, B, incRowB, incColB,
-                    BETA,
-                    C_test, incRowC, incColC
-                );
-                t1 = utils::get_walltime();
-                tTest += t1 - t0;
-                ++runs;
-            } while (tTest < 1);
-            tTest = tTest / runs;
-            error = gemm_err_est(m, n, k,
-                                             ALPHA,
-                                             A, incRowA, incColA, 
-                                             B, incRowB, incColB,
-                                             C_0, incRowC, incColC, 
-                                             BETA,
-                                             C_ref, incRowC, incColC,
-                                             C_test, incRowC, incColC);
-            // print the results
-            std::cout << " | "
-                      << std::scientific 
-                      << std::setw(12) << std::setprecision(2) << error  
-                      << std::setw(7) << std::setprecision(2) << tTest  
-                      << std::setw(12) << std::setprecision(2) << mflop / tTest 
-                      << "\n";
-        }
+        double tTest = 0; 
+        runs = 0;
+        do {
+            blas::gecopy(m, n, 
+                        false, C_0, incRowC, incColC, 
+                        C_test, incRowC, incColC);
+            t0 = utils::get_walltime();
+            blas::gemm<double>(
+                m, n, k,
+                ALPHA,
+                false, A, incRowA, incColA,
+                false, B, incRowB, incColB,
+                BETA,
+                C_test, incRowC, incColC
+            );
+            t1 = utils::get_walltime();
+            tTest += t1 - t0;
+            ++runs;
+        } while (tTest < 1);
+        tTest = tTest / runs;
+        double error = gemm_err_est(m, n, k,
+                                    ALPHA,
+                                    A, incRowA, incColA, 
+                                    B, incRowB, incColB,
+                                    C_0, incRowC, incColC, 
+                                    BETA,
+                                    C_ref, incRowC, incColC,
+                                    C_test, incRowC, incColC);
+        // print results
+        // std::cout << " | " s
+        std::cout << std::scientific << std::setw(12) << std::setprecision(2) << error;
+        std::cout << std::fixed 
+                  << std::setw(12) << std::setprecision(2) << tRef
+                  << std::setw(12) << std::setprecision(2) << tTest;
+        std::cout << std::fixed 
+                  << std::setw(12) << std::setprecision(2) << mflop / tRef
+                  << std::setw(12) << std::setprecision(2) << mflop / tTest
+                  << std::endl;
+
+        // deallocate memory
+        delete[] A;
+        delete[] B;
+        delete[] C_0;
+        delete[] C_ref;
+        delete[] C_test;
+
     }
 }

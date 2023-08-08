@@ -18,9 +18,7 @@ namespace hpc { namespace blas {
 
 
 
-using GemmConfigType = config::GemmConfigType;
-
-template <typename T, GemmConfigType ConfigType = GemmConfigType::Default>
+template <typename T>
 void gemm(std::size_t m, std::size_t n, std::size_t k,
           T alpha, 
           bool conjA, const T *A, std::ptrdiff_t incRowA, std::ptrdiff_t incColA,
@@ -34,12 +32,12 @@ void gemm(std::size_t m, std::size_t n, std::size_t k,
     }
 
     // load config
-    config::GemmConfig<T, ConfigType> gemm_conf;
+    config::GemmConfig<T> gemm_conf;
 
     // block sizes
-    std::size_t MC = conf.MC;
-    std::size_t NC = conf.NC;
-    std::size_t KC = conf.KC;
+    std::size_t MC = gemm_conf.MC;
+    std::size_t NC = gemm_conf.NC;
+    std::size_t KC = gemm_conf.KC;
 
     // number of blocks
     std::size_t mb = (m + MC-1)/MC;
@@ -52,8 +50,8 @@ void gemm(std::size_t m, std::size_t n, std::size_t k,
     std::size_t kc_ = k % KC;
 
     // Buffer for blocks 
-    utils::Buffer<T> A_(MC*KC+conf.extra_A);
-    utils::Buffer<T> B_(KC*NC+conf.extra_B); 
+    utils::Buffer<T> A_(MC*KC+gemm_conf.extra_A);
+    utils::Buffer<T> B_(KC*NC+gemm_conf.extra_B); 
 
     // loop j blocks
     for (std::size_t j=0; j<nb; ++j) {
@@ -67,21 +65,21 @@ void gemm(std::size_t m, std::size_t n, std::size_t k,
 
             T beta_ = (l==0) ? beta : 1;
 
-            conf.pack_B(K, N, conjB, 
-                        &B[l*KC*incRowB+j*NC*incColB], incRowB, incColB,
-                        B_.data());
+            gemm_conf.pack_B(K, N, conjB, 
+                             &B[l*KC*incRowB+j*NC*incColB], incRowB, incColB,
+                             B_.data());
 
             // loop i blocks
             for(std::size_t i=0; i<mb; ++i) {
 
                 std::size_t M = (i<mb-1 || mc_==0) ? MC : mc_;
 
-                conf.pack_A(M, K, conjA,
-                            &A[i*MC*incRowA+l*KC*incColA], incRowA, incColA,
-                            A_.data());
+                gemm_conf.pack_A(M, K, conjA,
+                                 &A[i*MC*incRowA+l*KC*incColA], incRowA, incColA,
+                                 A_.data());
 
-                conf.mgemm(M, N, K, alpha, A_.data(), B_.data(), beta_,
-                           &C[i*MC*incRowC+j*NC*incColC], incRowC, incColC);
+                gemm_conf.mgemm(M, N, K, alpha, A_.data(), B_.data(), beta_,
+                                &C[i*MC*incRowC+j*NC*incColC], incRowC, incColC);
             }
         }
     }

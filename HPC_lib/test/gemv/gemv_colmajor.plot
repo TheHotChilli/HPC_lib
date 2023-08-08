@@ -1,5 +1,7 @@
-set terminal svg size 900, 500
-set output "gemv_colmajor.svg"
+# set terminal svg size 900, 500
+# set output "gemv_colmajor.svg"
+set terminal pdf size 900, 500
+set output "gemv_colmajor.pdf"
 set xlabel "Matrix dim A: M=N"
 set ylabel "MFLOPS"
 set yrange [0:11000]

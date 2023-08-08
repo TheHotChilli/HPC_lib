@@ -23,27 +23,40 @@ namespace hpc { namespace blas {
 namespace config {
 
 
-// Possible micro kernel configurations
-enum GemmConfigType {
-    Default         = 0,
-    SSE             = 1,
-    AVX             = 2,
-    AVX_BLIS        = 3,
-    AVX_512         = 4
+// Potential configurations
+enum ConfigMode {
+    Undefined   = 0,
+    Reference   = 1,
+    SSE         = 2,
+    AVX         = 3,
+    AVX_BLIS    = 4,
+    AVX_512     = 5
 };
-// ugemm_config ugemm_variant = Defualt;
 
-std::string getConfigTypeString(GemmConfigType configType) {
-    switch (configType) {
-        case GemmConfigType::Default: return "Default";
-        case GemmConfigType::SSE: return "SSE";
-        case GemmConfigType::AVX: return "AVX";
-        case GemmConfigType::AVX_BLIS: return "AVX_BLIS";
-        case GemmConfigType::AVX_512: return "AVX_512";
-        default: return "Unknown";
+ConfigMode getConfigMode()
+{
+    static ConfigMode config = ConfigMode::Undefined;
+
+    static std::map<std::string, ConfigMode> configMap = {
+        {"Reference",   Reference},
+        {"SSE",         SSE},
+        {"AVX",         AVX},
+        {"AVX_BLIS",    AVX_BLIS},
+        {"AVX_512",     AVX_512}
+    };
+
+    if (config==ConfigMode::Undefined) {
+        const char *env = std::getenv("HPC_BLAS_GEMM_CONFIG_MODE");
+        std::string sel_env = (env) ? std::string(env) : std::string();
+        if (configMap.count(sel_env)>0) {
+            config = configMap[sel_env];
+        } else {
+            std::cout << "WARNING: Invalid ConfigMode provided. Will switch to Reference implementation.";
+            config = ConfigMode::Reference;
+        }
     }
+    return config;
 }
-
 
 // Function alias for macro kernel
 template <typename T>
@@ -56,9 +69,14 @@ using Pack  = void (*)(std::size_t, std::size_t, bool,
                        const T *, std::ptrdiff_t, std::ptrdiff_t,
                        T *);
 
+// Default block dimensions
+constexpr std::size_t MC_DEFAULT = 256;
+constexpr std::size_t NC_DEFAULT = 2048;
+constexpr std::size_t KC_DEFAULT = 256;
 
-// Generic Cases
-template<typename T, GemmConfigType ConfigType>
+
+// Generic Case
+template<typename T>
 struct GemmConfig 
 {
     std::size_t MC, NC, KC;                 // block sizes
@@ -72,11 +90,11 @@ struct GemmConfig
 
     GemmConfig()
     {
-        switch (ConfigType) {
-            case GemmConfigType::SSE:
-                MC = 256;
-                NC = 2048;
-                KC = 256;
+        switch (getConfigMode()) {
+            case ConfigMode::SSE:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
                 alignment = 0; 
                 extra_A   = 0;
                 extra_B   = 0;
@@ -85,10 +103,10 @@ struct GemmConfig
                 pack_A = blas::pack_A<T, MR>;
                 pack_B = blas::pack_B<T, NR>;
             
-            case GemmConfigType::AVX:
-                MC = 256;
-                NC = 2048;
-                KC = 256;
+            case ConfigMode::AVX:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
                 alignment = 0; // 16
                 extra_A   = 0;
                 extra_B   = 0;
@@ -97,10 +115,10 @@ struct GemmConfig
                 pack_A = blas::pack_A<T, MR>;
                 pack_B = blas::pack_B<T, NR>;
 
-            case GemmConfigType::AVX_512:
-                MC = 256;
-                NC = 2048;
-                KC = 256;
+            case ConfigMode::AVX_512:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
                 alignment = 0; // 16
                 extra_A   = 0;
                 extra_B   = 0;
@@ -110,9 +128,9 @@ struct GemmConfig
                 pack_B = blas::pack_B<T, NR>;
 
             default:
-                MC = 256;
-                NC = 2048;
-                KC = 256;
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
                 alignment = 0; 
                 extra_A   = 0;
                 extra_B   = 0;
@@ -125,9 +143,8 @@ struct GemmConfig
 };
 
 
-// BLIS 
 template <>
-struct GemmConfig<float, GemmConfigType::AVX_BLIS>
+struct GemmConfig<float>
 {
     std::size_t MC, NC, KC;                 // block sizes
     static constexpr std::size_t MR = 8;    // panels sizes
@@ -140,21 +157,73 @@ struct GemmConfig<float, GemmConfigType::AVX_BLIS>
 
     GemmConfig()
     {
-        MC = 256;
-        NC = 2048;
-        KC = 256;
-        alignment = 32;
-        extra_A   = 8;
-        extra_B   = 8;
+        switch (getConfigMode()) {
+            case ConfigMode::AVX_BLIS:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 32;
+                extra_A   = 8;
+                extra_B   = 8;
 
-        mgemm  = blas::mgemm<float, MR, NR, sugemm_asm_8x8>;
-        pack_A = blas::pack_A<float, MR>;
-        pack_B = blas::pack_B<float, NR>;
+                mgemm  = blas::mgemm<float, MR, NR, sugemm_asm_8x8>;
+                pack_A = blas::pack_A<float, MR>;
+                pack_B = blas::pack_B<float, NR>;
+
+            case ConfigMode::SSE:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; 
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<float, MR, NR, blas::ugemm_gccvec<float, MR, NR, 128>>;
+                pack_A = blas::pack_A<float, MR>;
+                pack_B = blas::pack_B<float, NR>;
+            
+            case ConfigMode::AVX:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; // 16
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<float, MR, NR, blas::ugemm_gccvec<float, MR, NR, 256>>;
+                pack_A = blas::pack_A<float, MR>;
+                pack_B = blas::pack_B<float, NR>;
+
+            case ConfigMode::AVX_512:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; // 16
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<float, MR, NR, blas::ugemm_gccvec<float, MR, NR, 512>>;
+                pack_A = blas::pack_A<float, MR>;
+                pack_B = blas::pack_B<float, NR>;
+
+            default:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; 
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<float, MR, NR, blas::ugemm_ref<float, MR, NR>>;
+                pack_A = blas::pack_A<float, MR>;
+                pack_B = blas::pack_B<float, NR>;
+        }
     }
 };
 
+
 template <>
-struct GemmConfig<double, GemmConfigType::AVX_BLIS>
+struct GemmConfig<double>
 {
     std::size_t MC, NC, KC;                 // block sizes
     static constexpr std::size_t MR = 8;    // panels sizes
@@ -167,21 +236,73 @@ struct GemmConfig<double, GemmConfigType::AVX_BLIS>
 
     GemmConfig()
     {
-        MC = 256;
-        NC = 2048;
-        KC = 256;
-        alignment = 32;
-        extra_A   = 8;
-        extra_B   = 4;
+        switch (getConfigMode()) {
+            case ConfigMode::AVX_BLIS:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 32;
+                extra_A   = 8;
+                extra_B   = 4;
 
-        mgemm  = blas::mgemm<double, MR, NR, dugemm_asm_8x4>;
-        pack_A = blas::pack_A<double, MR>;
-        pack_B = blas::pack_B<double, NR>;
+                mgemm  = blas::mgemm<double, MR, NR, dugemm_asm_8x4>;
+                pack_A = blas::pack_A<double, MR>;
+                pack_B = blas::pack_B<double, NR>;
+
+            case ConfigMode::SSE:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; 
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<double, MR, NR, blas::ugemm_gccvec<double, MR, NR, 128>>;
+                pack_A = blas::pack_A<double, MR>;
+                pack_B = blas::pack_B<double, NR>;
+            
+            case ConfigMode::AVX:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; // 16
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<double, MR, NR, blas::ugemm_gccvec<double, MR, NR, 256>>;
+                pack_A = blas::pack_A<double, MR>;
+                pack_B = blas::pack_B<double, NR>;
+
+            case ConfigMode::AVX_512:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; // 16
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<double, MR, NR, blas::ugemm_gccvec<double, MR, NR, 512>>;
+                pack_A = blas::pack_A<double, MR>;
+                pack_B = blas::pack_B<double, NR>;
+
+            default:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; 
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<double, MR, NR, blas::ugemm_ref<double, MR, NR>>;
+                pack_A = blas::pack_A<double, MR>;
+                pack_B = blas::pack_B<double, NR>;
+        }
     }
 };
 
+
 template <>
-struct GemmConfig<std::complex<float>, GemmConfigType::AVX_BLIS>
+struct GemmConfig<std::complex<float>>
 {
     std::size_t MC, NC, KC;                 // block sizes
     static constexpr std::size_t MR = 8;    // panels sizes
@@ -194,21 +315,73 @@ struct GemmConfig<std::complex<float>, GemmConfigType::AVX_BLIS>
 
     GemmConfig()
     {
-        MC = 256;
-        NC = 2048;
-        KC = 256;
-        alignment = 32;
-        extra_A   = 8;
-        extra_B   = 4;
+        switch (getConfigMode()) {
+            case ConfigMode::AVX_BLIS:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 32;
+                extra_A   = 8;
+                extra_B   = 4;
 
-        mgemm  = blas::mgemm<std::complex<float>, MR, NR, cugemm_asm_8x4>;
-        pack_A = blas::pack_A<std::complex<float>, MR>;
-        pack_B = blas::pack_B<std::complex<float>, NR>;
+                mgemm  = blas::mgemm<std::complex<float>, MR, NR, cugemm_asm_8x4>;
+                pack_A = blas::pack_A<std::complex<float>, MR>;
+                pack_B = blas::pack_B<std::complex<float>, NR>;
+
+            // case ConfigMode::SSE:
+            //     MC = MC_DEFAULT;
+            //     NC = NC_DEFAULT;
+            //     KC = KC_DEFAULT;
+            //     alignment = 0; 
+            //     extra_A   = 0;
+            //     extra_B   = 0;
+
+            //     mgemm  = blas::mgemm<std::complex<float>, MR, NR, blas::ugemm_gccvec<std::complex<float>, MR, NR, 128>>;
+            //     pack_A = blas::pack_A<std::complex<float>, MR>;
+            //     pack_B = blas::pack_B<std::complex<float>, NR>;
+            
+            // case ConfigMode::AVX:
+            //     MC = MC_DEFAULT;
+            //     NC = NC_DEFAULT;
+            //     KC = KC_DEFAULT;
+            //     alignment = 0; // 16
+            //     extra_A   = 0;
+            //     extra_B   = 0;
+
+            //     mgemm  = blas::mgemm<std::complex<float>, MR, NR, blas::ugemm_gccvec<std::complex<float>, MR, NR, 256>>;
+            //     pack_A = blas::pack_A<std::complex<float>, MR>;
+            //     pack_B = blas::pack_B<std::complex<float>, NR>;
+
+            // case ConfigMode::AVX_512:
+            //     MC = MC_DEFAULT;
+            //     NC = NC_DEFAULT;
+            //     KC = KC_DEFAULT;
+            //     alignment = 0; // 16
+            //     extra_A   = 0;
+            //     extra_B   = 0;
+
+            //     mgemm  = blas::mgemm<std::complex<float>, MR, NR, blas::ugemm_gccvec<std::complex<float>, MR, NR, 512>>;
+            //     pack_A = blas::pack_A<std::complex<float>, MR>;
+            //     pack_B = blas::pack_B<std::complex<float>, NR>;
+
+            default:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; 
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<std::complex<float>, MR, NR, blas::ugemm_ref<std::complex<float>, MR, NR>>;
+                pack_A = blas::pack_A<std::complex<float>, MR>;
+                pack_B = blas::pack_B<std::complex<float>, NR>;
+        }
     }
 };
 
+
 template <>
-struct GemmConfig<std::complex<double>, GemmConfigType::AVX_BLIS>
+struct GemmConfig<std::complex<double>>
 {
     std::size_t MC, NC, KC;                 // block sizes
     static constexpr std::size_t MR = 4;    // panels sizes
@@ -221,16 +394,67 @@ struct GemmConfig<std::complex<double>, GemmConfigType::AVX_BLIS>
 
     GemmConfig()
     {
-        MC = 256;
-        NC = 2048;
-        KC = 256;
-        alignment = 32;
-        extra_A   = 4;
-        extra_B   = 4;
+        switch (getConfigMode()) {
+            case ConfigMode::AVX_BLIS:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 32;
+                extra_A   = 4;
+                extra_B   = 4;
 
-        mgemm  = blas::mgemm<std::complex<double>, MR, NR, zugemm_asm_4x4>;
-        pack_A = blas::pack_A<std::complex<double>, MR>;
-        pack_B = blas::pack_B<std::complex<double>, NR>;
+                mgemm  = blas::mgemm<std::complex<double>, MR, NR, zugemm_asm_4x4>;
+                pack_A = blas::pack_A<std::complex<double>, MR>;
+                pack_B = blas::pack_B<std::complex<double>, NR>;
+
+            // case ConfigMode::SSE:
+            //     MC = MC_DEFAULT;
+            //     NC = NC_DEFAULT;
+            //     KC = KC_DEFAULT;
+            //     alignment = 0; 
+            //     extra_A   = 0;
+            //     extra_B   = 0;
+
+            //     mgemm  = blas::mgemm<std::complex<double>, MR, NR, blas::ugemm_gccvec<std::complex<double>, MR, NR, 128>>;
+            //     pack_A = blas::pack_A<std::complex<double>, MR>;
+            //     pack_B = blas::pack_B<std::complex<double>, NR>;
+            
+            // case ConfigMode::AVX:
+            //     MC = MC_DEFAULT;
+            //     NC = NC_DEFAULT;
+            //     KC = KC_DEFAULT;
+            //     alignment = 0; // 16
+            //     extra_A   = 0;
+            //     extra_B   = 0;
+
+            //     mgemm  = blas::mgemm<std::complex<double>, MR, NR, blas::ugemm_gccvec<std::complex<double>, MR, NR, 256>>;
+            //     pack_A = blas::pack_A<std::complex<double>, MR>;
+            //     pack_B = blas::pack_B<std::complex<double>, NR>;
+
+            // case ConfigMode::AVX_512:
+            //     MC = MC_DEFAULT;
+            //     NC = NC_DEFAULT;
+            //     KC = KC_DEFAULT;
+            //     alignment = 0; // 16
+            //     extra_A   = 0;
+            //     extra_B   = 0;
+
+            //     mgemm  = blas::mgemm<std::complex<double>, MR, NR, blas::ugemm_gccvec<std::complex<double>, MR, NR, 512>>;
+            //     pack_A = blas::pack_A<std::complex<double>, MR>;
+            //     pack_B = blas::pack_B<std::complex<double>, NR>;
+
+            default:
+                MC = MC_DEFAULT;
+                NC = NC_DEFAULT;
+                KC = KC_DEFAULT;
+                alignment = 0; 
+                extra_A   = 0;
+                extra_B   = 0;
+
+                mgemm  = blas::mgemm<std::complex<double>, MR, NR, blas::ugemm_ref<std::complex<double>, MR, NR>>;
+                pack_A = blas::pack_A<std::complex<double>, MR>;
+                pack_B = blas::pack_B<std::complex<double>, NR>;
+        }
     }
 };
 

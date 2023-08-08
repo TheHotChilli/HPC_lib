@@ -16,7 +16,7 @@ void initMatrix(std::size_t m, std::size_t n,
 {
     // A is row-major -> init A^T
     if (MY_ABS(incRowA) > MY_ABS(incColA)) {
-        initMatrix(n, m, A, incColA, incRowA);
+        initMatrix(n, m, A, incColA, incRowA, NaN);
         return;
     }
     // A is col-major

@@ -7,7 +7,22 @@
 namespace hpc { namespace blas { 
 
 
-/// @brief copy function for vectors (with different element types)
+/**
+ * @brief Copies elements from one array to another with optional conjugation.
+ *
+ * This function copies elements from the source array `x` to the destination array `y`.
+ * The number of elements to copy is determined by the parameter `n`. Array elements can
+ * have different types. 
+ *
+ * @tparam TX   The type of elements in the source array `x`.
+ * @tparam TY   The type of elements in the destination array `y`.
+ * @param n     The number of elements to copy.
+ * @param conjX Whether to apply conjugation to elements from array `x`.
+ * @param x     Pointer to the source array.
+ * @param incX  Increment for indexing elements in array `x`.
+ * @param y     Pointer to the destination array.
+ * @param incY  Increment for indexing elements in array `y`.
+ */
 template <typename TX, typename TY>
 void copy(std::size_t n,
           bool conjX, const TX *x, std::ptrdiff_t incX, 
@@ -19,7 +34,25 @@ void copy(std::size_t n,
 }
 
 
-/// @brief copy function for matrices (with different element types)
+
+/**
+ * @brief Copies elements from a source matrix to a destination matrix with optional conjugation.
+ *
+ * This function copies elements from the source matrix `A` to the destination matrix `B`.
+ * The dimensions of the matrices are specified by `m` and `n`.
+ *
+ * @tparam TA      The type of elements in the source matrix `A`.
+ * @tparam TB      The type of elements in the destination matrix `B`.
+ * @param m        The number of rows in the matrices.
+ * @param n        The number of columns in the matrices.
+ * @param conjA    Whether to apply conjugation to elements from matrix `A`.
+ * @param A        Pointer to the source matrix.
+ * @param incRowA  Increment for indexing rows in matrix `A`.
+ * @param incColA  Increment for indexing columns in matrix `A`.
+ * @param B        Pointer to the destination matrix.
+ * @param incRowB  Increment for indexing rows in matrix `B`.
+ * @param incColB  Increment for indexing columns in matrix `B`.
+ */
 template <typename TA, typename TB>
 void
 gecopy(std::size_t m, size_t n,

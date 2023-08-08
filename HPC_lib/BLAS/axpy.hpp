@@ -26,7 +26,7 @@ namespace hpc { namespace blas {
  * @param incY Increment between consecutive elements in the vector `y`.
  */
 template <typename TALPHA, typename TX, typename TY>
-void axpy(std::size_t n, const ALPHA &alpha, 
+void axpy(std::size_t n, const TALPHA &alpha, 
           const TX *x, std::ptrdiff_t incX, bool conjX,
           TY *y, std::ptrdiff_t incY)
 {
