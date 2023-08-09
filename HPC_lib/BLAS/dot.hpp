@@ -1,3 +1,8 @@
+/**
+ * @file dot.hpp
+ * @brief Definitions of dot product operations for vectors.
+ */
+
 #ifndef HPC_BLAS_DOT_HPP
 #define HPC_BLAS_DOT_HPP
 
@@ -7,6 +12,25 @@
 
 namespace hpc { namespace blas {
 
+
+/**
+ * @brief Calculate the dot product of two vectors.
+ *
+ * This function calculates the dot product of two input vectors `x` and `y`. The elements of the vectors are optionally
+ * conjugated based on the `conjX` and `conjY` parameters. 
+ * The operation is defined as: \f[ res \leftarrow \langle x, y \rangle = x^T y ]\f
+ *
+ * @tparam TX Data type of the elements in vector `x`.
+ * @tparam TY Data type of the elements in vector `y`.
+ * @param n Number of elements in the vectors `x` and `y`.
+ * @param x Pointer to the data of the input vector `x`.
+ * @param incX Increment between consecutive elements in the vector `x`.
+ * @param conjX Boolean indicating whether to conjugate the elements of the vector `x`.
+ * @param y Pointer to the data of the input vector `y`.
+ * @param incY Increment between consecutive elements in the vector `y`.
+ * @param conjY Boolean indicating whether to conjugate the elements of the vector `y`.
+ * @return The dot product of the vectors `x` and `y`.
+ */
 template <typename TX, typename TY>
 typename std::common_type<TX, TY>::type dot(
     std::size_t n,
@@ -34,6 +58,24 @@ typename std::common_type<TX, TY>::type dot(
 #define DGEMV_AXPYF_FUSE  6
 #endif
 
+/**
+ * @brief Calculate the dot product of two vectors with fusion optimization.
+ *
+ * This function calculates the dot product of two input vectors `x` and `y`, while applying fusion optimization.
+ * The elements of the vectors are optionally conjugated based on the `conjX` and `conjY` parameters.
+ * The operation is defined as: \f[ res \leftarrow \langle x, y \rangle = x^T y ]\f
+ *
+ * @tparam TX Data type of the elements in vector `x`.
+ * @tparam TY Data type of the elements in vector `y`.
+ * @param n Number of elements in the vectors `x` and `y`.
+ * @param x Pointer to the data of the input vector `x`.
+ * @param incX Increment between consecutive elements in the vector `x`.
+ * @param conjX Boolean indicating whether to conjugate the elements of the vector `x`.
+ * @param y Pointer to the data of the input vector `y`.
+ * @param incY Increment between consecutive elements in the vector `y`.
+ * @param conjY Boolean indicating whether to conjugate the elements of the vector `y`.
+ * @return The dot product of the vectors `x` and `y`.
+ */
 template <typename TX, typename TY>
 typename std::common_type<TX, TY>::type 
 dot_fused(

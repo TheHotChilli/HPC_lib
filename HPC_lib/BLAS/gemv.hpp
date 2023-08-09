@@ -1,3 +1,8 @@
+/**
+ * @file gemv.hpp
+ * @brief Definitions of GEMV operations (BLAS) for matrix-vector multiplication.
+ */
+
 #ifndef HPC_BLAS_GEMV_HPP
 #define HPC_BLAS_GEMV_HPP
 
@@ -8,6 +13,34 @@
 namespace hpc { namespace blas {
 
 
+/**
+ * @brief Computes a scaled matrix-vector product and adds the result to another scaled vector.
+ *
+ * This function performs the GEMV operation, multiplying a matrix `A` by a vector `x`, and adding the result
+ * to a vector `y`. The operation is controlled by parameters such as alpha, beta, and conjugation flags.
+ * The operation is performed in-place, meaning the vector `y` is modified directly.
+ * The operation is defined as: \f[ y\leftarrow \alpha A x + \beta y ]\f
+ *
+ * @tparam ALPHA Data type of the scalar `alpha`.
+ * @tparam BETA Data type of the scalar `beta`.
+ * @tparam TX Data type of the elements in vector `x`.
+ * @tparam TY Data type of the elements in vector `y`.
+ * @tparam TA Data type of the elements in matrix `A`.
+ * @param m Number of rows in matrix `A`.
+ * @param n Number of columns in matrix `A`.
+ * @param alpha Scalar value to scale the matrix-vector product.
+ * @param conjA Boolean indicating whether to conjugate the elements of matrix `A`.
+ * @param A Pointer to the data of matrix `A`.
+ * @param incRowA Increment between consecutive rows in matrix `A`.
+ * @param incColA Increment between consecutive columns in matrix `A`.
+ * @param conjX Boolean indicating whether to conjugate the elements of vector `x`.
+ * @param x Pointer to the data of vector `x`.
+ * @param incX Increment between consecutive elements in vector `x`.
+ * @param beta Scalar value to scale vector `y` before addition.
+ * @param conjY Boolean indicating whether to conjugate the elements of vector `y`.
+ * @param y Pointer to the data of vector `y`.
+ * @param incY Increment between consecutive elements in vector `y`.
+ */
 template <typename ALPHA, typename BETA,
           typename TX, typename TY, typename TA>
 void gemv(std::size_t m, std::size_t n, 
@@ -63,6 +96,35 @@ void gemv(std::size_t m, std::size_t n,
 #define DGEMV_AXPYF_FUSE  6
 #endif
 
+
+/**
+ * @brief Perform the GEMV operation with fusion optimization.
+ *
+ * This function performs the GEMV operation with fusion optimization, where the matrix-vector product is
+ * split into blocks for improved cache performance. The operation is controlled by parameters such as alpha,
+ * beta, and conjugation flags. The operation is performed in-place, meaning the vector `y` is modified directly.
+ * The operation is defined as: \f[ y\leftarrow \alpha A x + \beta y ]\f
+ *
+ * @tparam ALPHA Data type of the scalar `alpha`.
+ * @tparam BETA Data type of the scalar `beta`.
+ * @tparam TX Data type of the elements in vector `x`.
+ * @tparam TY Data type of the elements in vector `y`.
+ * @tparam TA Data type of the elements in matrix `A`.
+ * @param m Number of rows in matrix `A`.
+ * @param n Number of columns in matrix `A`.
+ * @param alpha Scalar value to scale the matrix-vector product.
+ * @param conjA Boolean indicating whether to conjugate the elements of matrix `A`.
+ * @param A Pointer to the data of matrix `A`.
+ * @param incRowA Increment between consecutive rows in matrix `A`.
+ * @param incColA Increment between consecutive columns in matrix `A`.
+ * @param conjX Boolean indicating whether to conjugate the elements of vector `x`.
+ * @param x Pointer to the data of vector `x`.
+ * @param incX Increment between consecutive elements in vector `x`.
+ * @param beta Scalar value to scale vector `y` before addition.
+ * @param conjY Boolean indicating whether to conjugate the elements of vector `y`.
+ * @param y Pointer to the data of vector `y`.
+ * @param incY Increment between consecutive elements in vector `y`.
+ */
 template <typename ALPHA, typename BETA,
           typename TX, typename TY, typename TA>
 void gemv_fused(std::size_t m, std::size_t n, 

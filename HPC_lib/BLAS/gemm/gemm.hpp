@@ -1,7 +1,6 @@
 /**
  * @file gemm.hpp
- * @author Joshua Bauske
- * @brief Generic implementation of BLAS GEMM operation (Matrix-Matrix product).
+ * @brief Definitions of frame algorithm for GEMM (General Matrix-Matrix multiplication) operation.
  */
 
 #ifndef HPC_BLAS_GEMM_HPP
@@ -17,7 +16,32 @@
 namespace hpc { namespace blas { 
 
 
-
+/**
+ * @brief Perform the GEMM operation (General Matrix-Matrix multiplication).
+ *
+ * This function performs the GEMM operation, multiplying two matrices `A` and `B`, and adding the result
+ * to a matrix `C`. The operation is controlled by parameters such as alpha, beta, and conjugation flags.
+ * The implementation is optimized with various configurations for better performance. 
+ * The GEMM operation is defined as: \f[ C \rightarrow \alpha A B + \beta C ]\f
+ *
+ * @tparam T Data type of the matrices and scalars.
+ * @param m Number of rows in matrix `C`.
+ * @param n Number of columns in matrix `C`.
+ * @param k Number of columns in matrix `A` (and number of rows in matrix `B`).
+ * @param alpha Scalar value to scale the matrix-matrix product.
+ * @param conjA Boolean indicating whether to conjugate the elements of matrix `A`.
+ * @param A Pointer to the data of matrix `A`.
+ * @param incRowA Increment between consecutive rows in matrix `A`.
+ * @param incColA Increment between consecutive columns in matrix `A`.
+ * @param conjB Boolean indicating whether to conjugate the elements of matrix `B`.
+ * @param B Pointer to the data of matrix `B`.
+ * @param incRowB Increment between consecutive rows in matrix `B`.
+ * @param incColB Increment between consecutive columns in matrix `B`.
+ * @param beta Scalar value to scale matrix `C` before addition.
+ * @param C Pointer to the data of matrix `C`.
+ * @param incRowC Increment between consecutive rows in matrix `C`.
+ * @param incColC Increment between consecutive columns in matrix `C`.
+ */
 template <typename T>
 void gemm(std::size_t m, std::size_t n, std::size_t k,
           T alpha, 

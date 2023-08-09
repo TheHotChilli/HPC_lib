@@ -10,6 +10,7 @@ namespace hpc { namespace blas {
  *
  * This function multiplies each element of the input vector `x` by the scalar `alpha`.
  * The operation is performed in-place, meaning the input vector `x` is modified directly.
+ * This operation is defined as: \f[ x \rightarrow \alpha x ]\f
  *
  * @tparam TALPHA Data type of the scalar `alpha`.
  * @tparam TX Data type of the elements in the vector `x`.
@@ -42,6 +43,7 @@ void scal(std::size_t n, const TALPHA & alpha,
  *
  * This function multiplies each element of the input matrix `A` by the scalar `alpha`.
  * The operation is performed in-place, meaning the input matrix `A` is modified directly.
+ * This operation is defined as: \f[ A \rightarrow \alpha A ]\f
  *
  * @tparam TALPHA Data type of the scalar `alpha`.
  * @tparam T Data type of the elements in the matrix `A`.

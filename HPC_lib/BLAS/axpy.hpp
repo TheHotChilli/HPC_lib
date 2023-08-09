@@ -1,3 +1,8 @@
+/**
+ * @file axpy.hpp
+ * @brief Definitions of AXPY operations (BLAS) for scaling and adding vectors and matrices.
+ */
+
 #ifndef HPC_BLAS_AXPY_HPP
 #define HPC_BLAS_AXPY_HPP
 
@@ -6,13 +11,17 @@
 
 namespace hpc { namespace blas { 
 
+
 /**
- * @brief Perform the AXPY operation (Alpha times x Plus y) on vectors.
+ * @brief Scales a vector and adds the result to another vector.
  *
  * This function scales the elements of the input vector `x` by the scalar `alpha`,
  * conjugates them if specified, and then adds the scaled vector to the elements of
  * the vector `y`. The operation is performed in-place, meaning the input vector `y`
- * is modified directly.
+ * is modified directly. The operation is defined as:
+ * \f[ 
+ *      y \leftarrow \alpha x
+ * ]\f
  *
  * @tparam TALPHA Data type of the scalar `alpha`.
  * @tparam TX Data type of the elements in the vector `x`.
@@ -46,12 +55,15 @@ void axpy(std::size_t n, const TALPHA &alpha,
 }
 
 /**
- * @brief Perform the GEAXPY operation (Generalized Alpha times X Plus Y) on matrices.
+ * @brief Scales a matrix and adds the result to another marix.
  *
  * This function scales the elements of the input matrix `A` by the scalar `alpha`,
  * conjugates them if specified, and then adds the scaled matrix to the elements
  * of the matrix `B`. The operation is performed in-place, meaning the input matrix `B`
- * is modified directly.
+ * is modified directly. The operation is defined as:
+ * \f[ 
+ *      Y \leftarrow \alpha X
+ * ]\f
  *
  * @tparam TALPHA Data type of the scalar `alpha`.
  * @tparam TA Data type of the elements in the matrix `A`.

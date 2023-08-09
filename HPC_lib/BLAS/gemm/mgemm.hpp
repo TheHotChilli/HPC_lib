@@ -20,15 +20,17 @@ using UGEMM = void (*)(std::size_t, T,
 /**
  * @brief GEMM Macrokernel 
  * 
- * This function performs a matrix-matrix multiplication C = alpha * A * B + beta * C
- * using a micro-kernel function provided by the user. The micro-kernel function must be
- * of the type `UGEMM<T>`. The matrice A and B are blocks from their parent matrices, available
- * in packed form. 
+ * This function takes as inputs pointers to matrices A and B, which represent blocks from 
+ * larger parent matrices, and performs the GEMM operation on these blocks. The blocks 
+ * are stored in a cache optimized pattern in buffers (packed). The blocks are further divided into 
+ * smaller sub-blocks (panels). The actual calculation of the GEMM operation takes place in the 
+ * microkernel (ugemm) at the panel level. The macrokernel iteratively passes the panels in A, B and C 
+ * that belong together for a calculation step to the microkernel. 
  * 
  * @tparam T Data type for the matrices (e.g., float, double, etc.).
  * @tparam MR Row blocking factor for matrix A.
  * @tparam NR Column blocking factor for matrix B.
- * @tparam ugemm Micro-kernel function pointer for performing the actual matrix multiplication.
+ * @tparam ugemm Micro-kernel function alias of type `UGEMM<T>` for performing the actual matrix multiplication.
  * @param[in] M Number of rows in matrix A and the number of rows in matrix C.
  * @param[in] N Number of columns in matrix B and the number of columns in matrix C.
  * @param[in] K Number of columns in matrix A and the number of rows in matrix B.

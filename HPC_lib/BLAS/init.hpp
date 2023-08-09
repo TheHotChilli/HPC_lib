@@ -1,3 +1,8 @@
+/**
+ * @file init.hpp
+ * @brief Definitions for initializing matrices.
+ */
+
 #ifndef HPC_UTILS_INIT_HPP
 #define HPC_UTILS_INIT_HPP
 
@@ -9,6 +14,19 @@
 namespace hpc { namespace blas {
 
 
+/**
+ * @brief Initialize a matrix with NaN values or random numbers.
+ *
+ * This function initializes a matrix with either NaN values or random numbers based on the given parameters.
+ *
+ * @tparam TA Data type of the matrix elements.
+ * @param m Number of rows in the matrix.
+ * @param n Number of columns in the matrix.
+ * @param A Pointer to the data of the matrix.
+ * @param incRowA Increment between consecutive rows in the matrix.
+ * @param incColA Increment between consecutive columns in the matrix.
+ * @param isNaN Boolean indicating whether to initialize with NaN values.
+ */
 template <typename TA>
 void initMatrix(std::size_t m, std::size_t n, 
                 TA *A, std::ptrdiff_t incRowA, std::ptrdiff_t incColA,

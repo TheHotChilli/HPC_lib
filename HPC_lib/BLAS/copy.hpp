@@ -1,3 +1,8 @@
+/**
+ * @file copy.hpp
+ * @brief Definition of the hpc::blas::copy function for copying vectors and matrices.
+ */
+
 #ifndef HPC_BLAS_COPY_HPP
 #define HPC_BLAS_COPY_HPP
 
@@ -12,7 +17,7 @@ namespace hpc { namespace blas {
  *
  * This function copies elements from the source array `x` to the destination array `y`.
  * The number of elements to copy is determined by the parameter `n`. Array elements can
- * have different types. 
+ * have different types. The operation is defined as: \f[ y \leftarrow x ]\f
  *
  * @tparam TX   The type of elements in the source array `x`.
  * @tparam TY   The type of elements in the destination array `y`.
@@ -39,7 +44,8 @@ void copy(std::size_t n,
  * @brief Copies elements from a source matrix to a destination matrix with optional conjugation.
  *
  * This function copies elements from the source matrix `A` to the destination matrix `B`.
- * The dimensions of the matrices are specified by `m` and `n`.
+ * The dimensions of the matrices are specified by `m` and `n`. 
+ * The operation is defined as: \f[ B \leftarrow A ]\f
  *
  * @tparam TA      The type of elements in the source matrix `A`.
  * @tparam TB      The type of elements in the destination matrix `B`.
