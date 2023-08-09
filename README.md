@@ -12,8 +12,6 @@ This project follows a modern canocial structure and is structured as follows:
     ├── test
     └── utils
 ```
-The 
-
 ### BLAS (Basic Linear Algebra Subprograms)
 This subfolder contains generic C++ implementations (using template parameters) for some operations from the Basic Linear Algebra Subprograms (BLAS). 
 
@@ -33,7 +31,7 @@ This project implements the level 1 operations __SCAL__, __COPY__, __DOT__ and _
 __GEMV__ and __GEMM__ operations form the basis for solving a wide range of more complex applications and are therefore very important in the field of high-performance computing. 
 
 __GEMV__ is defined as 
-  $$ y \leftarrow \alpha A x + \beta y,$$
+  $$y \leftarrow \alpha A x + \beta y,$$
 with $a \in \mathbb{C}$, $b \in \mathbb{C}$, $x \in \mathbb{C}^n$ ,$y \in \mathbb{C}^n$, $A \in \mathbb{C}^{m \times k}$.
 
 __GEMM__ is defined as 
@@ -41,9 +39,10 @@ __GEMM__ is defined as
 whereby $a \in \mathbb{C}$, $b \in \mathbb{C}$, $A \in \mathbb{C}^{m \times k}$, $B \in \mathbb{C}^{k \times n}$ and $C \in \mathbb{C}^{m \times n}$.
 
 ### test
-This subfolder contains tests for our implmentations of the __GEMV__ and __GEMM__ BLAS operations. For benchmarking we compare to the I[ntel Math Kernel Library (MKL)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html). All tests were run on a UNIX based system. 
+This subfolder contains tests for our implmentations of the __GEMV__ and __GEMM__ BLAS operations. For benchmarking we compare to the I[ntel Math Kernel Library (MKL)](https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html). All tests were run on a UNIX based system. In order to run the tests an installation of the MKL library is required. 
 
 ### utils
 Contains several functions that are used at various points within the project. 
 
 ## License
+This project is licensed under the MIT License - see the LICENSE.md file for details.
