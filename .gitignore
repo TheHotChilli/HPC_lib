@@ -1,3 +1,17 @@
+#######################################################
+# Workaround to ignore compiled files without filetype
+
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+#######################################################
+
 # Prerequisites
 *.d
 
